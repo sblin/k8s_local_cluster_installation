@@ -103,6 +103,8 @@ Keep the output of the previous command. This command will be executed later in 
 
 8.  Weave
 
+Weave (https://www.weave.works/docs/net/latest/overview/) is used to define a virtual network between the docker containers.
+
 Check that the master node is up and running:
 ```
 kubectl get nodes
@@ -111,10 +113,27 @@ NAME         STATUS     ROLES                  AGE     VERSION
 kubemaster   NotReady   control-plane,master   6m53s   v1.23.1
 ```
 
-On the master node, install weave:
+On the master node, get weave:
 
 ```
 wget https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+```
+
+Modify the definition to avoid the use of a Network Policy Controller (in order to allow access to the internet from the pods) and then apply the definition.  
+
+Set `EXPECT_NPC` to "0"
+
+```yaml
+containers:
+    - name: weave
+        env:
+        - name: INIT_CONTAINER
+            value: "true"
+        - name: EXPECT_NPC
+            value: "0"
+```
+
+```
 kubectl apply -f weave-daemonset-k8s.yaml
 ```
 
