@@ -23,7 +23,7 @@ vagrant ssh kubemaster
 vagrant ssh kubenode01
 ```
 
-In the following chapter we follow instructions describe in https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+In the following chapter we follow instructions described in https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 
 
 ## 4.  Configure
@@ -66,13 +66,13 @@ sudo dpkg -i docker.deb
 
 ## 6. Install kubelet, kubeadm and kubectl
 
-On each node install kubeadm (as root)
+On each node install kubeadm:
 ```
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
 ```
 
-Download the Google Cloud public signing key: (you may have to create the /etc/apt/keyrings directory)
+Download the Google Cloud public signing key: (you may have to create the `/etc/apt/keyrings` directory):
 ```
 sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 ```
@@ -82,6 +82,7 @@ Add the Kubernetes apt repository:
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 ```
 
+Update apt package index, install kubelet, kubeadm and kubectl, and pin their version:
 ```
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
