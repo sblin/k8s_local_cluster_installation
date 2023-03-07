@@ -2,44 +2,39 @@
 
 This repository describes all the steps to install a local k8s cluster.
 
-All the credits go to [https://github.com/kodekloudhub/certified-kubernetes-administrator-course](https://github.com/kodekloudhub/certified-kubernetes-administrator-course).
+Credits for `Vagrantfile`, `update-dns.sh` and `setup-hosts.sh` go to [https://github.com/kodekloudhub/certified-kubernetes-administrator-course](https://github.com/kodekloudhub/certified-kubernetes-administrator-course).
 
-I copied the 3 following files:
-```
-Vagrantfile
-    /ubuntu
-        update-dns.sh
-        /vagrant
-            setup-hosts.sh
-```
 
-1. Clone
+## 1. Clone
 
-Clone this repository and open a terminal in the directory of the repository.
+Clone this repository and open a terminal in the directory of the repository.   
+Change the Vagranfile to adapt the number of hosts and memory settings (default is 1 masyter, 1 node, 2048M)
 
-2.  Start
+## 2.  Create the machines
 
-Create the 3 machines:
 ```
 vagrant up
 ```
 
-3.  Connect
-
-Connect in SSH to each node:
+## 3.  Connect to each machine
 
 ```
 vagrant ssh kubemaster
 vagrant ssh kubenode01
-vagrant ssh kubenode02
 ```
-4.  Configure
 
-On each node execute the commands:
+In the following chapter we follow instructions describe in https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
+
+## 4.  Configure
+
+On each node check for the `br_netfilter` module. If not loaded, load the module:
 ```
 lsmod | grep br_netfilter
 sudo modprobe br_netfilter
-
+```
+Execute the script:
+```
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
@@ -47,21 +42,7 @@ EOF
 sudo sysctl --system
 ```
 
-5.  Install
-
-On each node install kubeadm (as root)
-```
-sudo apt-get update && sudo apt-get install -y apt-transport-https curl
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
-deb https://apt.kubernetes.io/ kubernetes-xenial main
-EOF
-sudo apt-get update
-sudo apt-get install -y kubelet kubeadm kubectl
-sudo apt-mark hold kubelet kubeadm kubectl
-```
-
-6.  Docker
+## 5.  Install docker 
 
 On each node install the cli, containerd and docker
 
@@ -83,7 +64,33 @@ curl https://download.docker.com/linux/ubuntu/dists/bionic/pool/stable/amd64/doc
 sudo dpkg -i docker.deb 
 ```
 
-7.  Only on the master node
+## 6. Install kubelet, kubeadm and kubectl
+
+On each node install kubeadm (as root)
+```
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+```
+
+Download the Google Cloud public signing key: (you may have to create the /etc/apt/keyrings directory)
+```
+sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+```
+
+Add the Kubernetes apt repository:
+```
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+```
+
+```
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+```
+
+## 7.  Create the cluster
+
+**** Only on the master node ****
 
 ```
 sudo su
@@ -101,7 +108,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 Keep the output of the previous command. This command will be executed later in each worker node.
 
-8.  Weave
+## 8.  Weave
 
 Weave (https://www.weave.works/docs/net/latest/overview/) is used to define a virtual network between the docker containers.
 
@@ -137,7 +144,7 @@ containers:
 kubectl apply -f weave-daemonset-k8s.yaml
 ```
 
-9.  Add workers
+## 9.  Add workers
 
 On each worker node:
 ```
@@ -148,7 +155,7 @@ systemctl restart containerd
 
 Then execute the command saved in step 7
 
-10. Verify
+## 10. Verify
 
 Check that the worker nodes have joined the cluster
 ```
@@ -157,13 +164,12 @@ kubectl get nodes
 NAME         STATUS   ROLES                  AGE   VERSION
 kubemaster   Ready    control-plane,master   12m   v1.23.1
 kubenode01   Ready    <none>                 51s   v1.23.1
-kubenode02   Ready    <none>                 21s   v1.23.1
 ```
 
 The k8s cluster is up and running.
 
-11. Get access
+## 11. Get access
 
-To get access to the cluster from the host machine, merge the content of the ```.kube/config``` file into your local k8s config file.
+To get access to the cluster from the host machine, merge the content of the `.kube/config` file into your local k8s config file.
 
 
