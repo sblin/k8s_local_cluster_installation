@@ -1,6 +1,6 @@
 # K8S local cluster installation
 
-This repository describes all the steps to install a local k8s cluster.
+This repository describes all the steps to install a local k8s cluster using Docker and Virtual Box.
 
 Credits for `Vagrantfile`, `update-dns.sh` and `setup-hosts.sh` go to [https://github.com/kodekloudhub/certified-kubernetes-administrator-course](https://github.com/kodekloudhub/certified-kubernetes-administrator-course).
 
@@ -8,7 +8,7 @@ Credits for `Vagrantfile`, `update-dns.sh` and `setup-hosts.sh` go to [https://g
 ## 1. Clone
 
 Clone this repository and open a terminal in the directory of the repository.   
-Change the Vagranfile to adapt the number of hosts and memory settings (default is 1 masyter, 1 node, 2048M)
+Change the Vagranfile to adapt the number of hosts and memory settings (default is 1 master node, 1 runner node, 2048M/node)
 
 ## 2.  Create the machines
 
@@ -44,7 +44,7 @@ sudo sysctl --system
 
 ## 5.  Install docker 
 
-On each node install the cli, containerd and docker
+On each node install the cli, containerd and docker (we can chnage for newer versions)
 
 The docker cli:
 ```
@@ -99,6 +99,8 @@ rm /etc/containerd/config.toml
 systemctl restart containerd
 kubeadm init --pod-network-cidr 10.244.0.0/16 --apiserver-advertise-address=192.168.56.2
 ```
+Keep the output of the command. This command will be executed later in each worker node.
+
 
 Then as a regular user:
 ```
@@ -106,8 +108,6 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
-
-Keep the output of the previous command. This command will be executed later in each worker node.
 
 ## 8.  Weave
 
