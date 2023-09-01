@@ -1,5 +1,11 @@
 # K8S local cluster installation
 
+Modification history:
+
+- September 1, 2023:
+    - Update point 5 to get newer versions of docker
+    - Update point 6 with k8s version 1.28   
+***
 This repository describes all the steps to install a local k8s cluster using Docker and Virtual Box.
 
 Credits for `Vagrantfile`, `update-dns.sh` and `setup-hosts.sh` go to [https://github.com/kodekloudhub/certified-kubernetes-administrator-course](https://github.com/kodekloudhub/certified-kubernetes-administrator-course).
@@ -44,23 +50,23 @@ sudo sysctl --system
 
 ## 5.  Install docker 
 
-On each node install the cli, containerd and docker (we can chnage for newer versions)
+On each node install the cli, containerd and docker (we can change for newer versions)
 
 The docker cli:
 ```
-curl https://download.docker.com/linux/ubuntu/dists/bionic/pool/stable/amd64/docker-ce-cli_20.10.21~3-0~ubuntu-bionic_amd64.deb --output cli.deb
+curl https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/docker-ce-cli_24.0.5-1~ubuntu.20.04~focal_amd64.deb --output cli.deb
 sudo dpkg -i cli.deb
 ```
 
 Containerd:
 ```
-curl https://download.docker.com/linux/ubuntu/dists/bionic/pool/stable/amd64/containerd.io_1.6.9-1_amd64.deb --output containerd.deb
+curl https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/containerd.io_1.6.9-1_amd64.deb --output containerd.deb
 sudo dpkg -i containerd.deb
 ```
 
 Docker:
 ```
-curl https://download.docker.com/linux/ubuntu/dists/bionic/pool/stable/amd64/docker-ce_20.10.21~3-0~ubuntu-bionic_amd64.deb --output docker.deb
+curl https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/docker-ce_24.0.5-1~ubuntu.20.04~focal_amd64.deb --output docker.deb
 sudo dpkg -i docker.deb 
 ```
 
@@ -72,20 +78,28 @@ sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
 ```
 
-Download the Google Cloud public signing key: (you may have to create the `/etc/apt/keyrings` directory):
+On Ubuntu 20.04 `/etc/apt/keyrings` does not exist:
 ```
-sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+sudo mkdir -755 /etc/apt/keyrings
 ```
+
+```
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+```
+
+
 
 Add the Kubernetes apt repository:
 ```
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 ```
 
 Update apt package index, install kubelet, kubeadm and kubectl, and pin their version:
 ```
 sudo apt-get update
-sudo apt-get install -y kubelet kubeadm kubectl
+sudo snap install kubelet --classic
+sudo snap install kubeadm --classic
+sudo snap install kubectl --classic
 sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
