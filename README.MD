@@ -1,8 +1,9 @@
 # K8S local cluster installation
 
 Modification history:
-
-- September 1, 2023:
+- September 7, 2023
+    - Add a default storageclass
+- September 1, 2023: 
     - Update point 5 to get newer versions of docker
     - Update point 6 with k8s version 1.28   
 ***
@@ -183,8 +184,23 @@ kubenode01   Ready    <none>                 51s   v1.23.1
 
 The k8s cluster is up and running.
 
-## 11. Get access
+## 11. Add a default storageclass (optiona)
+
+You can add a default storageclass:
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+  annotations:
+    "storageclass.kubernetes.io/is-default-class": "true"
+provisioner: kubernetes.io/no-provisioner
+reclaimPolicy: Retain
+allowVolumeExpansion: false
+volumeBindingMode: WaitForFirstConsumer
+```
+
+## 12. Get access
 
 To get access to the cluster from the host machine, merge the content of the `.kube/config` file into your local k8s config file.
-
 
