@@ -184,7 +184,7 @@ kubenode01   Ready    <none>                 51s   v1.23.1
 
 The k8s cluster is up and running.
 
-## 11. Add a default storageclass (optiona)
+## 11. Add a default storageclass (optional)
 
 You can add a default storageclass:
 ```yaml
